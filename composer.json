@@ -1,0 +1,9 @@
+{
+    "name": "finaccchain/research-prototype",
+    "description": "FinAccChain - Smart Financial Accountability for MSMEs (TKT 3 research prototype)",
+    "type": "project",
+    "require": {
+        "php": ">=7.4",
+        "dompdf/dompdf": "^2.0"
+    }
+}
