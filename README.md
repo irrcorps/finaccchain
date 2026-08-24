@@ -61,6 +61,45 @@ Sesuaikan kredensial di `config/database.php` bila MySQL Anda memakai user/passw
 4. Jalankan server:
    - Dev server bawaan PHP: `php -S localhost:8000` dari root proyek, lalu buka `http://localhost:8000/index.php`.
    - Atau taruh folder ini di `htdocs` XAMPP dan akses via Apache — URL dasar dideteksi otomatis (`config/app.php`).
+
+## Deployment Cloud (Render + TiDB Cloud)
+
+Sumber kode dan database **tidak diubah/dibangun ulang** — hanya ditambahkan lapisan konfigurasi berbasis environment variable (opsional, ada default untuk lokal) dan file build container.
+
+### 1. Database — TiDB Cloud Starter
+
+1. Buat cluster **TiDB Cloud Starter** (gratis), lalu buat database baru (mis. `finaccchain`) — charset default TiDB Cloud sudah `utf8mb4`.
+2. Import schema lalu data demo (ganti `<HOST>`, `<USER>`, `<DATABASE>` sesuai kredensial cluster Anda; TiDB Cloud wajib TLS):
+   ```bash
+   mysql --comments -h <HOST> -P 4000 -u <USER> -p --ssl-mode=REQUIRED -D <DATABASE> < database/production_schema.sql
+   mysql --comments -h <HOST> -P 4000 -u <USER> -p --ssl-mode=REQUIRED -D <DATABASE> < database/demo_seed.sql
+   ```
+3. Verifikasi cepat: `SELECT COUNT(*) FROM transactions;` harus mengembalikan `14`, `SELECT COUNT(*) FROM users;` harus `5`.
+
+### 2. Web Service — Render
+
+1. Push repo ini ke GitHub (sudah dilakukan bila Anda membaca ini dari GitHub).
+2. Di Render: **New + → Blueprint**, arahkan ke repo ini — [`render.yaml`](render.yaml) sudah mendefinisikan service `finaccchain` (Docker, Free plan, health check `/health.php`).
+3. Isi environment variable yang ditandai *secret* di dashboard Render (`DB_HOST`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` dari TiDB Cloud). `APP_URL`, `DB_PORT`, `DB_SSL_MODE`, `SESSION_SECURE` sudah terisi default di `render.yaml`.
+4. Deploy. [`Dockerfile`](Dockerfile) meng-install hanya extension yang dipakai aplikasi (`pdo_mysql`, `mysqli`, `mbstring`), menjalankan `composer install --no-dev --optimize-autoloader`, dan mengarahkan Apache ke `$PORT` yang diberikan Render (lihat `docker-entrypoint.sh`). Document root tetap root proyek — struktur folder tidak dipindah.
+
+### 3. Environment Variables
+
+| Variable | Wajib | Keterangan |
+|---|---|---|
+| `APP_ENV` | - | `production` mematikan `display_errors` (default lokal: tampil, untuk debugging) |
+| `APP_URL` | disarankan | mis. `https://finaccchain.onrender.com` — override auto-deteksi base URL |
+| `DB_HOST`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` | ya | dari TiDB Cloud Starter |
+| `DB_PORT` | - | default `3306` lokal / `4000` TiDB Cloud |
+| `DB_SSL_MODE` | - | `require` untuk TiDB Cloud (wajib TLS) |
+| `DB_SSL_CA` | - | umumnya dikosongkan (CA sistem sudah cukup untuk endpoint publik TiDB Cloud) |
+| `SESSION_SECURE` | - | `true` di produksi agar cookie sesi hanya dikirim lewat HTTPS |
+
+Tanpa environment variable di atas, aplikasi tetap berjalan normal di lokal memakai default XAMPP (`config/database.php`, `config/app.php`). Lihat [`.env.example`](.env.example) untuk referensi (file `.env` sendiri tidak pernah di-commit, lihat `.gitignore`).
+
+### 4. Health Check
+
+`GET /health.php` → `application=FinAccChain`, `status=ok|degraded`, `database=connected|error` (tanpa membocorkan kredensial). Dipakai Render sebagai health check endpoint.
 5. Folder `uploads/evidence` harus writable oleh proses PHP (dibuat otomatis saat upload pertama).
 
 ## Akun Demo
@@ -120,6 +159,7 @@ Seluruh data demo ditandai `is_demo = 1` pada tabel `users`/`msmes`/`transaction
 5. Server email belum terpasang; reset password menampilkan tautan langsung di layar untuk keperluan demo (bukan alur produksi).
 6. Belum ada pengujian keamanan/penetrasi formal; ditujukan untuk lingkungan riset/lab, bukan produksi.
 7. Modul akuntansi sengaja disederhanakan (tanpa multi-currency, sub-ledger, atau fitur ERP lanjutan).
+8. **Render Free memakai filesystem ephemeral** — file bukti transaksi yang diunggah pengguna (`uploads/evidence/`, ditulis oleh `TransactionService::attachEvidence()`) akan hilang saat instance restart/redeploy. Untuk demo penelitian ini sengaja dibiarkan sederhana (tautan bukti transaksi demo bisa 404 setelah redeploy); gunakan storage eksternal (S3-compatible) hanya bila persistensi unggahan pengguna benar-benar dibutuhkan.
 
 ## Tingkat Kesiapterapan Teknologi (TKT)
 

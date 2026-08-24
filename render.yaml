@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: finaccchain
+    env: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health.php
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_URL
+        value: https://finaccchain.onrender.com
+      - key: SESSION_SECURE
+        value: "true"
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        value: "4000"
+      - key: DB_DATABASE
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_SSL_MODE
+        value: require
+      - key: DB_SSL_CA
+        value: ""

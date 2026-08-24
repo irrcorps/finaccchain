@@ -1,0 +1,9 @@
+.git
+.github
+vendor
+uploads/evidence/*
+!uploads/evidence/.gitkeep
+.env
+.env.*
+*.log
+node_modules

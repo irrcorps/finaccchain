@@ -9,3 +9,8 @@
 .DS_Store
 Thumbs.db
 *.log
+
+# Local environment overrides (never commit real credentials)
+.env
+.env.*
+!.env.example
