@@ -1,5 +1,7 @@
 # FinAccChain — Smart Financial Accountability for MSMEs
 
+[![PHP Lint](https://github.com/irrcorps/finaccchain/actions/workflows/lint.yml/badge.svg)](https://github.com/irrcorps/finaccchain/actions/workflows/lint.yml)
+
 **Functional research prototype (TKT 3)** dibangun untuk mendukung penelitian PDP 2026:
 
 > **"Perancangan Model Integrasi Smart Contract Berbasis Fintech untuk Penguatan
