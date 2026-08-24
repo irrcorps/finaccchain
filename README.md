@@ -68,6 +68,8 @@ Sumber kode dan database **tidak diubah/dibangun ulang** — hanya ditambahkan l
 
 ### 1. Database — TiDB Cloud Starter
 
+Pedoman lengkap langkah-demi-langkah (Bahasa Indonesia): [`docs/DEPLOY_TIDB.md`](docs/DEPLOY_TIDB.md).
+
 1. Buat cluster **TiDB Cloud Starter** (gratis), lalu buat database baru (mis. `finaccchain`) — charset default TiDB Cloud sudah `utf8mb4`.
 2. Import schema lalu data demo (ganti `<HOST>`, `<USER>`, `<DATABASE>` sesuai kredensial cluster Anda; TiDB Cloud wajib TLS):
    ```bash
