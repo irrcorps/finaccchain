@@ -1,0 +1,17 @@
+# FinAccChain - minimal Apache hardening. No routing/rewrite needed:
+# every page is its own .php file, so this only blocks direct access to
+# non-web-facing folders and file types.
+
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+</IfModule>
+
+<FilesMatch "\.(env|sql|log|json|lock|md)$">
+    Require all denied
+</FilesMatch>
+
+<IfModule mod_alias.c>
+    RedirectMatch 403 ^/(core|config|database)/
+</IfModule>
